@@ -23,24 +23,31 @@ from concurrent.futures import ThreadPoolExecutor, as_completed
 import contextvars
 
 try:  # pragma: no cover - prefer package-relative import when available
-    from .context_builder import handle_failure, PromptBuildError
+    from .prompt_failure import handle_failure, PromptBuildError
 except Exception:  # pragma: no cover - fall back to flat layout or stubs
     try:
-        from context_builder import handle_failure, PromptBuildError  # type: ignore
+        from prompt_failure import handle_failure, PromptBuildError  # type: ignore
     except Exception:  # pragma: no cover - minimal graceful degradation
 
         class PromptBuildError(RuntimeError):
-            """Fallback error used when the real context builder is unavailable."""
+            """Fallback error used when the shared failure helpers are unavailable."""
 
-        def handle_failure(message: str, exc: Exception, *, logger=None) -> None:
-            """Fallback failure handler that logs and re-raises the exception."""
+        def handle_failure(
+            message: str,
+            exc: Exception,
+            *,
+            logger=None,
+            raise_error: bool = True,
+        ) -> None:
+            """Fallback failure handler that logs and optionally re-raises."""
 
             if logger is not None:
                 try:
                     logger.exception(message, exc_info=exc)
                 except Exception:
                     pass
-            raise exc
+            if raise_error:
+                raise exc
 
 from .code_database import CodeDB, CodeRecord, PatchHistoryDB, PatchRecord
 from .unified_event_bus import UnifiedEventBus

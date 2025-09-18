@@ -45,7 +45,10 @@ from vector_service import FallbackResult, ContextBuilder
 from prompt_types import Prompt
 from snippet_compressor import compress_snippets
 from context_builder_util import ensure_fresh_weights
-from context_builder import handle_failure, PromptBuildError
+try:  # pragma: no cover - allow execution inside the package and flat layout
+    from .prompt_failure import handle_failure, PromptBuildError
+except Exception:  # pragma: no cover - fallback when executed from source root
+    from prompt_failure import handle_failure, PromptBuildError  # type: ignore
 try:  # pragma: no cover - optional dependency
     from vector_service import ErrorResult  # type: ignore
 except Exception:  # pragma: no cover - fallback
@@ -679,6 +682,7 @@ def build_section_prompt(
             "failed to build sandbox section prompt",
             exc,
             logger=logger,
+            raise_error=False,
         )
         raise
 

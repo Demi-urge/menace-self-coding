@@ -22,7 +22,10 @@ from filelock import FileLock
 
 from redaction_utils import redact_text
 from snippet_compressor import compress_snippets
-from context_builder import handle_failure, PromptBuildError
+try:  # pragma: no cover - prefer package relative import when available
+    from .prompt_failure import handle_failure, PromptBuildError
+except Exception:  # pragma: no cover - fallback for execution from source root
+    from prompt_failure import handle_failure, PromptBuildError  # type: ignore
 
 from .decorators import log_and_measure
 from .exceptions import MalformedPromptError, RateLimitError, VectorServiceError
