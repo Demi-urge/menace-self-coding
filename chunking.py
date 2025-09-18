@@ -6,7 +6,10 @@ from dataclasses import dataclass
 from pathlib import Path
 from typing import Dict, List, TYPE_CHECKING
 
-from context_builder import handle_failure, PromptBuildError
+try:  # pragma: no cover - support both package and flat layouts
+    from menace.prompt_failure import handle_failure, PromptBuildError
+except Exception:  # pragma: no cover - fallback when running from source root
+    from prompt_failure import handle_failure, PromptBuildError  # type: ignore
 
 if TYPE_CHECKING:  # pragma: no cover - imported for type hints only
     from llm_interface import LLMClient
@@ -288,7 +291,11 @@ def summarize_snippet(
         except Exception as exc:
             if isinstance(exc, PromptBuildError):
                 raise
-            handle_failure("failed to build snippet summary prompt", exc)
+            handle_failure(
+                "failed to build snippet summary prompt",
+                exc,
+                raise_error=False,
+            )
         else:
             try:
                 result = llm.generate(prompt, context_builder=context_builder)
