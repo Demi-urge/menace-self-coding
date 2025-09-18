@@ -20,6 +20,9 @@ except Exception:  # pragma: no cover - lightweight fallbacks for tests
         def __init__(self, *args, **kwargs):
             pass
 
+        def watch_events(self, *args, **kwargs):
+            return None
+
     Retriever = PatchLogger = CognitionLayer = EmbeddingBackfill = SharedVectorService = ContextBuilder = _Stub  # type: ignore
 
     class FallbackResult(list):

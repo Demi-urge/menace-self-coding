@@ -28,7 +28,24 @@ import sys
 from pydantic.dataclasses import dataclass as pydantic_dataclass
 from dataclasses import asdict
 
-import license_detector
+_LICENSE_DETECTOR_AVAILABLE = True
+try:
+    import license_detector  # type: ignore
+except Exception:  # pragma: no cover - optional dependency
+    _LICENSE_DETECTOR_AVAILABLE = False
+
+    class _LicenseDetectorStub:
+        """Fallback implementation when ``license_detector`` is unavailable."""
+
+        @staticmethod
+        def detect(_code: str) -> None:
+            return None
+
+        @staticmethod
+        def fingerprint(_code: str) -> str:
+            return ""
+
+    license_detector = _LicenseDetectorStub()  # type: ignore
 try:  # pragma: no cover - allow running without vector_service
     from vector_service import EmbeddableDBMixin, EmbeddingBackfill
 except Exception:  # pragma: no cover - lightweight stub for tests
@@ -97,6 +114,11 @@ except Exception:  # pragma: no cover - fallback for top-level imports
 
 logger = logging.getLogger(__name__)
 
+if not _LICENSE_DETECTOR_AVAILABLE:  # pragma: no cover - environment specific
+    logger.warning(
+        "license_detector package not available; skipping license enforcement checks"
+    )
+
 _WATCH_THREAD: threading.Thread | None = None
 
 
@@ -120,7 +142,84 @@ def _ensure_backfill_watcher(bus: "UnifiedEventBus" | None) -> None:
 
 _ensure_backfill_watcher(UnifiedEventBus())
 
-SQL_DIR = resolve_path("sql_templates")
+_FALLBACK_SQL: dict[str, str] = {
+    "create_code_table.sql": """
+    CREATE TABLE IF NOT EXISTS code(
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        source_menace_id TEXT NOT NULL DEFAULT '',
+        code TEXT NOT NULL,
+        template_type TEXT,
+        language TEXT,
+        version TEXT,
+        complexity_score REAL DEFAULT 0,
+        summary TEXT,
+        revision INTEGER DEFAULT 0
+    )
+    """,
+    "create_code_bots_table.sql": """
+    CREATE TABLE IF NOT EXISTS code_bots(
+        source_menace_id TEXT NOT NULL DEFAULT '',
+        code_id INTEGER NOT NULL,
+        bot_id TEXT NOT NULL
+    )
+    """,
+    "create_code_enhancements_table.sql": """
+    CREATE TABLE IF NOT EXISTS code_enhancements(
+        source_menace_id TEXT NOT NULL DEFAULT '',
+        code_id INTEGER NOT NULL,
+        enhancement_id INTEGER NOT NULL
+    )
+    """,
+    "create_code_errors_table.sql": """
+    CREATE TABLE IF NOT EXISTS code_errors(
+        source_menace_id TEXT NOT NULL DEFAULT '',
+        code_id INTEGER NOT NULL,
+        error_id INTEGER NOT NULL
+    )
+    """,
+    "create_index_code_bots_code.sql": "CREATE INDEX IF NOT EXISTS idx_code_bots_code ON code_bots(code_id)",
+    "create_index_code_bots_bot.sql": "CREATE INDEX IF NOT EXISTS idx_code_bots_bot ON code_bots(bot_id)",
+    "create_index_code_enhancements_code.sql": "CREATE INDEX IF NOT EXISTS idx_code_enhancements_code ON code_enhancements(code_id)",
+    "create_index_code_enhancements_enh.sql": "CREATE INDEX IF NOT EXISTS idx_code_enhancements_enh ON code_enhancements(enhancement_id)",
+    "create_index_code_errors_code.sql": "CREATE INDEX IF NOT EXISTS idx_code_errors_code ON code_errors(code_id)",
+    "create_index_code_errors_error.sql": "CREATE INDEX IF NOT EXISTS idx_code_errors_error ON code_errors(error_id)",
+    "create_index_code_summary.sql": "CREATE INDEX IF NOT EXISTS idx_code_summary ON code(summary)",
+    "create_index_code_body.sql": "CREATE INDEX IF NOT EXISTS idx_code_body ON code(code)",
+    "create_index_code_source_menace.sql": "CREATE INDEX IF NOT EXISTS idx_code_source ON code(source_menace_id)",
+    "create_fts.sql": "CREATE VIRTUAL TABLE IF NOT EXISTS code_fts USING fts5(summary, code)",
+    "populate_fts.sql": "INSERT INTO code_fts(rowid, summary, code) SELECT id, summary, code FROM code",
+    "insert_code.sql": """
+    INSERT INTO code(
+        source_menace_id,
+        code,
+        template_type,
+        language,
+        version,
+        complexity_score,
+        summary
+    ) VALUES (?, ?, ?, ?, ?, ?, ?)
+    """,
+    "insert_fts.sql": "INSERT INTO code_fts(rowid, summary, code) VALUES (?, ?, ?)",
+    "select_revision.sql": "SELECT revision FROM code WHERE id=? AND source_menace_id=?",
+    "delete_fts_row.sql": "DELETE FROM code_fts WHERE rowid=?",
+    "delete_code.sql": "DELETE FROM code WHERE id=? AND source_menace_id=?",
+    "search_fts.sql": "SELECT id, summary, code FROM code WHERE summary LIKE ? OR code LIKE ? LIMIT ?",
+    "search_fallback.sql": "SELECT id, summary, code FROM code WHERE summary LIKE ? OR code LIKE ? LIMIT ?",
+    "select_all.sql": "SELECT id, code, template_type, language, version, complexity_score, summary, revision, source_menace_id FROM code",
+    "select_code_bots.sql": "SELECT code_id, bot_id FROM code_bots WHERE source_menace_id=?",
+    "insert_code_bot.sql": "INSERT INTO code_bots(source_menace_id, code_id, bot_id) VALUES (?, ?, ?)",
+    "insert_code_enhancement.sql": "INSERT INTO code_enhancements(source_menace_id, code_id, enhancement_id) VALUES (?, ?, ?)",
+    "insert_code_error.sql": "INSERT INTO code_errors(source_menace_id, code_id, error_id) VALUES (?, ?, ?)",
+    "delete_code_bots.sql": "DELETE FROM code_bots WHERE source_menace_id=? AND code_id=?",
+    "delete_code_enhancements.sql": "DELETE FROM code_enhancements WHERE source_menace_id=? AND code_id=?",
+    "delete_code_errors.sql": "DELETE FROM code_errors WHERE source_menace_id=? AND code_id=?",
+    "select_by_complexity.sql": "SELECT id, code, summary FROM code WHERE complexity_score<=? ORDER BY complexity_score ASC LIMIT ?",
+}
+
+try:
+    SQL_DIR = resolve_path("sql_templates")
+except FileNotFoundError:
+    SQL_DIR = Path(__file__).resolve().parent / "sql_templates"
 
 
 def _load_sql(name: str) -> str:
@@ -143,6 +242,10 @@ def _load_sql(name: str) -> str:
                         return data
             except Exception as exc2:  # pragma: no cover - unexpected
                 logger.warning("fallback SQL load failed for %s: %s", name, exc2)
+        fallback = _FALLBACK_SQL.get(name, "")
+        if fallback:
+            logger.info("using built-in SQL for template %s", name)
+            return fallback.strip()
         logger.error("using empty SQL for template %s", name)
         return ""
 
