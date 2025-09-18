@@ -1,0 +1,484 @@
+default:
+  roi_drop: -0.1
+  error_increase: 1.0
+  test_failure_increase: 0.0
+  patch_success_drop: -0.2
+  model: exponential
+  confidence: 0.95
+  workflow_tests:
+  - tests/workflows/test_smoke.py::test_default_workflow
+bots:
+  AICounterBot:
+    roi_drop: -0.1
+    error_increase: 1.0
+    test_failure_increase: 0.0
+    workflow_tests:
+    - tests/workflows/test_ai_counter.py::test_metrics_cycle
+  AntifragilityPredictionBot:
+    roi_drop: -0.1
+    error_increase: 1.0
+    test_failure_increase: 0.0
+  AutomatedDebugger:
+    roi_drop: -0.1
+    error_increase: 1.0
+    test_failure_increase: 0.0
+  AutomatedReviewer:
+    roi_drop: -0.1
+    error_increase: 0.2
+    test_failure_increase: 0.0
+  AverageMetricBot:
+    roi_drop: -0.1
+    error_increase: 1.0
+    test_failure_increase: 0.0
+  AverageSynergyMetricBot:
+    roi_drop: -0.1
+    error_increase: 1.0
+    test_failure_increase: 0.0
+  AverageSynergyROIBot:
+    roi_drop: -0.05
+    error_increase: 0.5
+    test_failure_increase: 0.0
+  BotCreationBot:
+    roi_drop: -0.1
+    error_increase: 0.2
+    test_failure_increase: 0.0
+  BotDevelopmentBot:
+    roi_drop: -0.1
+    error_increase: 0.2
+    test_failure_increase: 0.0
+  BotPlanningBot:
+    roi_drop: -0.1
+    error_increase: 1.0
+    test_failure_increase: 0.0
+  BotTestingBot:
+    roi_drop: -0.1
+    error_increase: 0.2
+    test_failure_increase: 0.0
+  CapitalManagementBot:
+    roi_drop: -0.05
+    error_increase: 0.5
+    test_failure_increase: 0.0
+  CentralDatabaseBot:
+    roi_drop: -0.2
+    error_increase: 1.5
+    test_failure_increase: 0.05
+  ChatGPTEnhancementBot:
+    roi_drop: -0.1
+    error_increase: 1.0
+    test_failure_increase: 0.0
+  ChatGPTPredictionBot:
+    roi_drop: -0.1
+    error_increase: 1.0
+    test_failure_increase: 0.0
+  ChatGPTResearchBot:
+    roi_drop: -0.1
+    error_increase: 1.0
+    test_failure_increase: 0.0
+  CommunicationMaintenanceBot:
+    roi_drop: -0.1
+    error_increase: 1.0
+    test_failure_increase: 0.0
+  CommunicationTestingBot:
+    roi_drop: -0.1
+    error_increase: 1.0
+    test_failure_increase: 0.0
+  CompetitiveIntelligenceBot:
+    roi_drop: -0.1
+    error_increase: 1.0
+    test_failure_increase: 0.0
+  ContrarianModelBot:
+    roi_drop: -0.1
+    error_increase: 1.0
+    test_failure_increase: 0.0
+  ConversationManagerBot:
+    roi_drop: -0.1
+    error_increase: 1.0
+    test_failure_increase: 0.0
+  DataBot:
+    roi_drop: -0.2
+    error_increase: 1.5
+    test_failure_increase: 0.1
+  DatabaseManagementBot:
+    roi_drop: -0.2
+    error_increase: 1.5
+    test_failure_increase: 0.05
+  DatabaseStewardBot:
+    roi_drop: -0.2
+    error_increase: 1.5
+    test_failure_increase: 0.05
+  DeploymentBot:
+    roi_drop: -0.1
+    error_increase: 1.0
+    test_failure_increase: 0.0
+  DiscrepancyDetectionBot:
+    roi_drop: -0.1
+    error_increase: 1.0
+    test_failure_increase: 0.0
+  EfficiencyBot:
+    roi_drop: -0.1
+    error_increase: 1.0
+    test_failure_increase: 0.0
+  EnergyForecastBot:
+    roi_drop: -0.1
+    error_increase: 1.0
+    test_failure_increase: 0.0
+  EnhancementBot:
+    roi_drop: -0.1
+    error_increase: 1.0
+    test_failure_increase: 0.0
+  ErrorBot:
+    roi_drop: -0.1
+    error_increase: 1.0
+    test_failure_increase: 0.0
+  EvolutionAnalysisBot:
+    roi_drop: -0.1
+    error_increase: 1.0
+    test_failure_increase: 0.0
+  FinanceRouterBot:
+    roi_drop: -0.05
+    error_increase: 0.5
+    test_failure_increase: 0.0
+  FlexibilityPredictionBot:
+    roi_drop: -0.1
+    error_increase: 1.0
+    test_failure_increase: 0.0
+  FutureAntifragilityBot:
+    roi_drop: -0.25
+    error_increase: 2.0
+    test_failure_increase: 0.1
+  FutureLucrativityBot:
+    roi_drop: -0.25
+    error_increase: 2.0
+    test_failure_increase: 0.1
+  FutureProfitabilityBot:
+    roi_drop: -0.25
+    error_increase: 2.0
+    test_failure_increase: 0.1
+  FutureShannonEntropyBot:
+    roi_drop: -0.25
+    error_increase: 2.0
+    test_failure_increase: 0.1
+  FutureSynergyAdaptabilityBot:
+    roi_drop: -0.25
+    error_increase: 2.0
+    test_failure_increase: 0.1
+  FutureSynergyAntifragilityBot:
+    roi_drop: -0.25
+    error_increase: 2.0
+    test_failure_increase: 0.1
+  FutureSynergyCPUUsageBot:
+    roi_drop: -0.25
+    error_increase: 2.0
+    test_failure_increase: 0.1
+  FutureSynergyCodeQualityBot:
+    roi_drop: -0.25
+    error_increase: 2.0
+    test_failure_increase: 0.1
+  FutureSynergyDiscrepancyCountBot:
+    roi_drop: -0.25
+    error_increase: 2.0
+    test_failure_increase: 0.1
+  FutureSynergyEfficiencyBot:
+    roi_drop: -0.25
+    error_increase: 2.0
+    test_failure_increase: 0.1
+  FutureSynergyEnergyConsumptionBot:
+    roi_drop: -0.25
+    error_increase: 2.0
+    test_failure_increase: 0.1
+  FutureSynergyFlexibilityBot:
+    roi_drop: -0.25
+    error_increase: 2.0
+    test_failure_increase: 0.1
+  FutureSynergyGPUUsageBot:
+    roi_drop: -0.25
+    error_increase: 2.0
+    test_failure_increase: 0.1
+  FutureSynergyLongTermLucrativityBot:
+    roi_drop: -0.25
+    error_increase: 2.0
+    test_failure_increase: 0.1
+  FutureSynergyMaintainabilityBot:
+    roi_drop: -0.25
+    error_increase: 2.0
+    test_failure_increase: 0.1
+  FutureSynergyMemoryUsageBot:
+    roi_drop: -0.25
+    error_increase: 2.0
+    test_failure_increase: 0.1
+  FutureSynergyNetworkLatencyBot:
+    roi_drop: -0.25
+    error_increase: 2.0
+    test_failure_increase: 0.1
+  FutureSynergyProfitBot:
+    roi_drop: -0.25
+    error_increase: 2.0
+    test_failure_increase: 0.1
+  FutureSynergyRecoveryTimeBot:
+    roi_drop: -0.25
+    error_increase: 2.0
+    test_failure_increase: 0.1
+  FutureSynergyResilienceBot:
+    roi_drop: -0.25
+    error_increase: 2.0
+    test_failure_increase: 0.1
+  FutureSynergyRiskIndexBot:
+    roi_drop: -0.25
+    error_increase: 2.0
+    test_failure_increase: 0.1
+  FutureSynergySafetyRatingBot:
+    roi_drop: -0.25
+    error_increase: 2.0
+    test_failure_increase: 0.1
+  FutureSynergySecurityScoreBot:
+    roi_drop: -0.25
+    error_increase: 2.0
+    test_failure_increase: 0.1
+  FutureSynergyShannonEntropyBot:
+    roi_drop: -0.25
+    error_increase: 2.0
+    test_failure_increase: 0.1
+  FutureSynergyThroughputBot:
+    roi_drop: -0.25
+    error_increase: 2.0
+    test_failure_increase: 0.1
+  GAPredictionBot:
+    roi_drop: -0.1
+    error_increase: 1.0
+    test_failure_increase: 0.0
+  GeneticAlgorithmBot:
+    roi_drop: -0.1
+    error_increase: 1.0
+    test_failure_increase: 0.0
+  H1OversightBot:
+    roi_drop: -0.05
+    error_increase: 0.5
+    test_failure_increase: 0.0
+  H2OversightBot:
+    roi_drop: -0.05
+    error_increase: 0.5
+    test_failure_increase: 0.0
+  H3OversightBot:
+    roi_drop: -0.05
+    error_increase: 0.5
+    test_failure_increase: 0.0
+  HierarchyAssessmentBot:
+    roi_drop: -0.1
+    error_increase: 1.0
+    test_failure_increase: 0.0
+  IPOBot:
+    roi_drop: -0.1
+    error_increase: 1.0
+    test_failure_increase: 0.0
+  ImplementationOptimiserBot:
+    roi_drop: -0.1
+    error_increase: 0.2
+    test_failure_increase: 0.0
+  InformationSynthesisBot:
+    roi_drop: -0.1
+    error_increase: 1.0
+    test_failure_increase: 0.0
+  L1OversightBot:
+    roi_drop: -0.05
+    error_increase: 0.5
+    test_failure_increase: 0.0
+  L2OversightBot:
+    roi_drop: -0.05
+    error_increase: 0.5
+    test_failure_increase: 0.0
+  L3OversightBot:
+    roi_drop: -0.05
+    error_increase: 0.5
+    test_failure_increase: 0.0
+  M1OversightBot:
+    roi_drop: -0.05
+    error_increase: 0.5
+    test_failure_increase: 0.0
+  M2OversightBot:
+    roi_drop: -0.05
+    error_increase: 0.5
+    test_failure_increase: 0.0
+  M3OversightBot:
+    roi_drop: -0.05
+    error_increase: 0.5
+    test_failure_increase: 0.0
+  MarketManipulationBot:
+    roi_drop: -0.05
+    error_increase: 0.5
+    test_failure_increase: 0.0
+  MemoryBot:
+    roi_drop: -0.2
+    error_increase: 1.5
+    test_failure_increase: 0.05
+  MetaGeneticAlgorithmBot:
+    roi_drop: -0.1
+    error_increase: 1.0
+    test_failure_increase: 0.0
+  MirrorBot:
+    roi_drop: -0.1
+    error_increase: 1.0
+    test_failure_increase: 0.0
+  NicheSaturationBot:
+    roi_drop: -0.1
+    error_increase: 1.0
+    test_failure_increase: 0.0
+  OfferTestingBot:
+    roi_drop: -0.1
+    error_increase: 1.0
+    test_failure_increase: 0.0
+  OperationalMonitoringBot:
+    roi_drop: -0.1
+    error_increase: 1.0
+    test_failure_increase: 0.0
+  OversightBot:
+    roi_drop: -0.05
+    error_increase: 0.5
+    test_failure_increase: 0.0
+  PassiveDiscoveryBot:
+    roi_drop: -0.1
+    error_increase: 1.0
+    test_failure_increase: 0.0
+  PerformanceAssessmentBot:
+    roi_drop: -0.1
+    error_increase: 1.0
+    test_failure_increase: 0.0
+  PreExecutionROIBot:
+    roi_drop: -0.05
+    error_increase: 0.5
+    test_failure_increase: 0.0
+  PreliminaryResearchBot:
+    roi_drop: -0.1
+    error_increase: 1.0
+    test_failure_increase: 0.0
+  QueryBot:
+    roi_drop: -0.1
+    error_increase: 1.0
+    test_failure_increase: 0.02
+  QuickFixEngine:
+    roi_drop: -0.1
+    error_increase: 1.0
+    test_failure_increase: 0.0
+  ReportGenerationBot:
+    roi_drop: -0.1
+    error_increase: 1.0
+    test_failure_increase: 0.02
+  ResearchAggregatorBot:
+    roi_drop: -0.1
+    error_increase: 1.0
+    test_failure_increase: 0.0
+  ResearchFallbackBot:
+    roi_drop: -0.1
+    error_increase: 1.0
+    test_failure_increase: 0.0
+  ResourceAllocationBot:
+    roi_drop: -0.05
+    error_increase: 0.5
+    test_failure_increase: 0.0
+  ResourcePredictionBot:
+    roi_drop: -0.05
+    error_increase: 0.5
+    test_failure_increase: 0.0
+  ResourcesBot:
+    roi_drop: -0.05
+    error_increase: 0.5
+    test_failure_increase: 0.0
+  SanityConsumer:
+    roi_drop: -0.1
+    error_increase: 1.0
+    test_failure_increase: 0.0
+  SanityFeedback:
+    roi_drop: -0.1
+    error_increase: 1.0
+    test_failure_increase: 0.0
+  ScalabilityAssessmentBot:
+    roi_drop: -0.1
+    error_increase: 1.0
+    test_failure_increase: 0.0
+  SentimentBot:
+    roi_drop: -0.1
+    error_increase: 1.0
+    test_failure_increase: 0.0
+  ShannonEntropyPredictionBot:
+    roi_drop: -0.1
+    error_increase: 1.0
+    test_failure_increase: 0.0
+  StrategyPredictionBot:
+    roi_drop: -0.1
+    error_increase: 1.0
+    test_failure_increase: 0.0
+  StructuralEvolutionBot:
+    roi_drop: -0.1
+    error_increase: 1.0
+    test_failure_increase: 0.0
+  TaskHandoffBot:
+    roi_drop: -0.1
+    error_increase: 1.0
+    test_failure_increase: 0.0
+  TaskValidationBot:
+    roi_drop: -0.1
+    error_increase: 1.0
+    test_failure_increase: 0.0
+  TelemetryFeedback:
+    roi_drop: -0.1
+    error_increase: 1.0
+    test_failure_increase: 0.0
+  TextResearchBot:
+    roi_drop: -0.1
+    error_increase: 1.0
+    test_failure_increase: 0.0
+  VideoResearchBot:
+    roi_drop: -0.1
+    error_increase: 1.0
+    test_failure_increase: 0.0
+  WeeklyMetricsBot:
+    roi_drop: -0.1
+    error_increase: 1.0
+    test_failure_increase: 0.0
+  WorkflowEvolutionBot:
+    roi_drop: -0.1
+    error_increase: 1.0
+    test_failure_increase: 0.0
+  agent:
+    roi_drop: -0.1
+    error_increase: 1.0
+    test_failure_increase: 0.0
+    patch_success_drop: -0.2
+    model: exponential
+    confidence: 0.95
+    model_params: {}
+  finance_router:
+    roi_drop: -0.05
+    error_increase: 0.5
+    test_failure_increase: 0.0
+  menace:
+    roi_drop: -0.2
+    error_increase: 2.0
+    test_failure_increase: 0.0
+    model: simple
+    confidence: 0.9
+  research_aggregator:
+    roi_drop: -0.15
+    error_increase: 1.5
+    test_failure_increase: 0.1
+    model: arima
+    confidence: 0.9
+  bot:
+    roi_drop: -0.1
+    error_increase: 1.0
+    test_failure_increase: 0.0
+    patch_success_drop: -0.2
+    model: exponential
+    confidence: 0.95
+    model_params: {}
+  auto_patch_cycle_bot:
+    roi_drop: -0.1
+    error_increase: 1.0
+    test_failure_increase: 0.0
+  sample:
+    roi_drop: -0.1
+    error_increase: 1.0
+    test_failure_increase: 0.5
+    patch_success_drop: -0.2
+    model: exponential
+    confidence: 0.95
+    model_params: {}

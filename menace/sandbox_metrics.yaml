@@ -1,0 +1,11 @@
+extra_metrics:
+  code_quality: 0.0
+  maintainability: 0.0
+  stale_containers_removed: 0.0
+  stale_vms_removed: 0.0
+  runtime_vms_removed: 0.0
+  orphan_modules_added: 0.0
+  synergy_update_success: 0.0
+  intent_update_success: 0.0
+  self_coding_cycle_success: 0.0
+  self_coding_cycle_retries: 0.0

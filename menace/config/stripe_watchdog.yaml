@@ -1,0 +1,14 @@
+allowed_webhooks:
+  - https://example.com/stripe/webhook
+  - we_1234567890
+approved_workflows:
+  - billing_bot
+log_rotation:
+  maxBytes: 5242880
+  backupCount: 5
+sanity_layer_feedback: true
+adaptive_issue_handling: true
+anomaly_suppression:
+  window_seconds: 60
+  max_occurrences: 1
+  severity_threshold: 0.0

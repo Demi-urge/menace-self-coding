@@ -1,0 +1,51 @@
+[project]
+name = "menace-self-coding"
+version = "0.1.0"
+description = "Standalone Menace self-coding engine"
+requires-python = ">=3.11"
+
+dependencies = [
+    # Core LLM and vector support
+    "openai",                         # or anthropic, whichever you're using
+    "sentence-transformers",         # for embedding vectors
+    "faiss-cpu",                     # vector search backend
+    "annoy",                         # alternative to faiss if used
+    "hdbscan",                       # cluster scoring for ROI
+
+    # Prompt memory, audit, tracking
+    "numpy",
+    "pandas",
+    "PyYAML",
+    "tiktoken",                      # for token counting in prompts
+
+    # Logging & sandbox runner utilities
+    "psutil",                        # sandbox memory usage tracking
+    "pytest",                        # patch test runner
+    "SQLAlchemy",                   # used in patch DB or memory
+    "sqlparse",                      # if parsing SQL for audits
+    "alembic",                       # for DB migrations if needed
+
+    # Misc tools used by various utils
+    "filelock",
+    "fuzzywuzzy[speedup]",
+    "scikit-learn",
+    "pydantic",
+    "pydantic-settings",
+
+    # Optional but likely needed
+    "GitPython",                     # patch provenance tracking
+    "PyPDF2",                        # if auditing PDF-based docstrings
+    "redis",                         # if caching thresholds or job queue
+    "torch",                         # required by sentence-transformers sometimes
+    "radon",                         # for code complexity tracking
+]
+
+[project.optional-dependencies]
+test = [
+    "pytest",
+    "hypothesis"
+]
+
+[build-system]
+requires = ["setuptools>=61.0"]
+build-backend = "setuptools.build_meta"
