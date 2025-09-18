@@ -28,7 +28,10 @@ import sys
 from pydantic.dataclasses import dataclass as pydantic_dataclass
 from dataclasses import asdict
 
-import license_detector
+try:  # pragma: no cover - support both package and flat imports
+    from . import license_detector
+except Exception:  # pragma: no cover - fallback for top-level execution
+    import license_detector  # type: ignore
 try:  # pragma: no cover - allow running without vector_service
     from vector_service import EmbeddableDBMixin, EmbeddingBackfill
 except Exception:  # pragma: no cover - lightweight stub for tests
