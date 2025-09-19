@@ -528,6 +528,7 @@ class AlignmentSettings(BaseModel):
         "failure_threshold",
         "improvement_warning_threshold",
         "improvement_failure_threshold",
+        **FIELD_VALIDATOR_KWARGS,
     )
     @_apply_validator_signature
     def _alignment_unit_range(
