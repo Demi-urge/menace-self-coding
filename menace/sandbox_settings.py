@@ -25,9 +25,11 @@ except Exception:  # pragma: no cover - fallback for pydantic<2
 from pydantic import BaseModel, Field
 
 try:  # pragma: no cover - compatibility shim
-    from pydantic import field_validator
+    from pydantic import FieldValidationInfo, field_validator
 except Exception:  # pragma: no cover
     from pydantic import validator as field_validator  # type: ignore
+
+    FieldValidationInfo = Any  # type: ignore[misc,assignment]
 
 SELF_CODING_ROI_DROP: float = float(os.getenv("SELF_CODING_ROI_DROP", "-0.1"))
 SELF_CODING_ERROR_INCREASE: float = float(
@@ -328,53 +330,123 @@ class SynergySettings(BaseModel):
     python_max_replay: int = 1000
     deviation_tolerance: float = 0.0
 
-    @field_validator(
-        "threshold",
-        "confidence",
-        "threshold_weight",
-        "stationarity_confidence",
-        "std_threshold",
-        "variance_confidence",
-        "gamma",
-    )
-    def _synergy_unit_range(cls, v: float | None, info: Any) -> float | None:
-        if v is not None and not 0 <= v <= 1:
-            raise ValueError(f"{info.field_name} must be between 0 and 1")
-        return v
+    if PYDANTIC_V2:
 
-    @field_validator(
-        "threshold_window",
-        "ma_window",
-        "train_interval",
-        "replay_size",
-        "batch_size",
-        "hidden_size",
-        "layers",
-        "checkpoint_interval",
-        "target_sync",
-        "python_max_replay",
-    )
-    def _synergy_positive_int(cls, v: int | None, info: Any) -> int | None:
-        if v is not None and v <= 0:
-            raise ValueError(f"{info.field_name} must be a positive integer")
-        return v
+        @field_validator(
+            "threshold",
+            "confidence",
+            "threshold_weight",
+            "stationarity_confidence",
+            "std_threshold",
+            "variance_confidence",
+            "gamma",
+        )
+        def _synergy_unit_range(
+            cls, v: float | None, info: FieldValidationInfo
+        ) -> float | None:
+            field_name = getattr(info, "field_name", "value")
+            if v is not None and not 0 <= v <= 1:
+                raise ValueError(f"{field_name} must be between 0 and 1")
+            return v
 
-    @field_validator(
-        "weight_roi",
-        "weight_efficiency",
-        "weight_resilience",
-        "weight_antifragility",
-        "weight_reliability",
-        "weight_maintainability",
-        "weight_throughput",
-        "weights_lr",
-        "noise",
-        "deviation_tolerance",
-    )
-    def _synergy_non_negative(cls, v: float, info: Any) -> float:
-        if v < 0:
-            raise ValueError(f"{info.field_name} must be non-negative")
-        return v
+        @field_validator(
+            "threshold_window",
+            "ma_window",
+            "train_interval",
+            "replay_size",
+            "batch_size",
+            "hidden_size",
+            "layers",
+            "checkpoint_interval",
+            "target_sync",
+            "python_max_replay",
+        )
+        def _synergy_positive_int(
+            cls, v: int | None, info: FieldValidationInfo
+        ) -> int | None:
+            field_name = getattr(info, "field_name", "value")
+            if v is not None and v <= 0:
+                raise ValueError(f"{field_name} must be a positive integer")
+            return v
+
+        @field_validator(
+            "weight_roi",
+            "weight_efficiency",
+            "weight_resilience",
+            "weight_antifragility",
+            "weight_reliability",
+            "weight_maintainability",
+            "weight_throughput",
+            "weights_lr",
+            "noise",
+            "deviation_tolerance",
+        )
+        def _synergy_non_negative(
+            cls, v: float, info: FieldValidationInfo
+        ) -> float:
+            field_name = getattr(info, "field_name", "value")
+            if v < 0:
+                raise ValueError(f"{field_name} must be non-negative")
+            return v
+
+    else:  # pragma: no cover - compatibility for pydantic<2
+
+        @field_validator(
+            "threshold",
+            "confidence",
+            "threshold_weight",
+            "stationarity_confidence",
+            "std_threshold",
+            "variance_confidence",
+            "gamma",
+        )
+        def _synergy_unit_range(
+            cls, v: float | None, values: dict[str, Any], field: Any, **_: Any
+        ) -> float | None:
+            field_name = getattr(field, "name", "value")
+            if v is not None and not 0 <= v <= 1:
+                raise ValueError(f"{field_name} must be between 0 and 1")
+            return v
+
+        @field_validator(
+            "threshold_window",
+            "ma_window",
+            "train_interval",
+            "replay_size",
+            "batch_size",
+            "hidden_size",
+            "layers",
+            "checkpoint_interval",
+            "target_sync",
+            "python_max_replay",
+        )
+        def _synergy_positive_int(
+            cls, v: int | None, values: dict[str, Any], field: Any, **_: Any
+        ) -> int | None:
+            field_name = getattr(field, "name", "value")
+            if v is not None and v <= 0:
+                raise ValueError(f"{field_name} must be a positive integer")
+            return v
+
+        @field_validator(
+            "weight_roi",
+            "weight_efficiency",
+            "weight_resilience",
+            "weight_antifragility",
+            "weight_reliability",
+            "weight_maintainability",
+            "weight_throughput",
+            "weights_lr",
+            "noise",
+            "deviation_tolerance",
+        )
+        def _synergy_non_negative(
+            cls, v: float, values: dict[str, Any], field: Any, **_: Any
+        ) -> float:
+            field_name = getattr(field, "name", "value")
+            if v < 0:
+                raise ValueError(f"{field_name} must be non-negative")
+            return v
 
     @field_validator("strategy")
     def _synergy_strategy(cls, v: str) -> str:
