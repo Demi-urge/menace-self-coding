@@ -502,7 +502,7 @@ class SynergySettings(BaseModel):
             raise ValueError(f"{field_name} must be non-negative")
         return v
 
-    @field_validator("strategy")
+    @field_validator("strategy", **FIELD_VALIDATOR_KWARGS)
     def _synergy_strategy(cls, v: str) -> str:
         allowed = {"dqn", "double_dqn", "sac", "td3"}
         if v not in allowed:
