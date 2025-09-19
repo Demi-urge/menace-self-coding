@@ -1146,6 +1146,7 @@ class SandboxSettings(BaseSettings):
             "required_env_vars",
             "sandbox_required_db_files",
             mode="before",
+            **FIELD_VALIDATOR_KWARGS,
         )
         def _parse_dependency_list(cls, v: Any) -> Any:
             if isinstance(v, str):
@@ -1157,7 +1158,11 @@ class SandboxSettings(BaseSettings):
                     return [i.strip() for i in v.split(",") if i.strip()]
             return v
 
-        @field_validator("optional_service_versions", mode="before")
+        @field_validator(
+            "optional_service_versions",
+            mode="before",
+            **FIELD_VALIDATOR_KWARGS,
+        )
         def _parse_optional_service_versions(cls, v: Any) -> Any:
             if isinstance(v, str):
                 try:
@@ -1166,7 +1171,11 @@ class SandboxSettings(BaseSettings):
                     return {}
             return v
 
-        @field_validator("available_backends", mode="before")
+        @field_validator(
+            "available_backends",
+            mode="before",
+            **FIELD_VALIDATOR_KWARGS,
+        )
         def _parse_available_backends(cls, v: Any) -> Any:
             if isinstance(v, str):
                 try:
@@ -1183,6 +1192,7 @@ class SandboxSettings(BaseSettings):
             "required_env_vars",
             "sandbox_required_db_files",
             pre=True,
+            **FIELD_VALIDATOR_KWARGS,
         )
         def _parse_dependency_list(cls, v: Any) -> Any:  # type: ignore[override]
             if isinstance(v, str):
@@ -1194,7 +1204,11 @@ class SandboxSettings(BaseSettings):
                     return [i.strip() for i in v.split(",") if i.strip()]
             return v
 
-        @field_validator("optional_service_versions", pre=True)
+        @field_validator(
+            "optional_service_versions",
+            pre=True,
+            **FIELD_VALIDATOR_KWARGS,
+        )
         def _parse_optional_service_versions(cls, v: Any) -> Any:  # type: ignore[override]
             if isinstance(v, str):
                 try:
@@ -1203,7 +1217,11 @@ class SandboxSettings(BaseSettings):
                     return {}
             return v
 
-        @field_validator("available_backends", pre=True)
+        @field_validator(
+            "available_backends",
+            pre=True,
+            **FIELD_VALIDATOR_KWARGS,
+        )
         def _parse_available_backends(cls, v: Any) -> Any:  # type: ignore[override]
             if isinstance(v, str):
                 try:
