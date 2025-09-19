@@ -414,6 +414,7 @@ class SynergySettings(BaseModel):
         "std_threshold",
         "variance_confidence",
         "gamma",
+        **FIELD_VALIDATOR_KWARGS,
     )
     @_apply_validator_signature
     def _synergy_unit_range(
@@ -446,6 +447,7 @@ class SynergySettings(BaseModel):
         "checkpoint_interval",
         "target_sync",
         "python_max_replay",
+        **FIELD_VALIDATOR_KWARGS,
     )
     @_apply_validator_signature
     def _synergy_positive_int(
@@ -478,6 +480,7 @@ class SynergySettings(BaseModel):
         "weights_lr",
         "noise",
         "deviation_tolerance",
+        **FIELD_VALIDATOR_KWARGS,
     )
     @_apply_validator_signature
     def _synergy_non_negative(
