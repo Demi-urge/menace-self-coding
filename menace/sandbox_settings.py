@@ -649,42 +649,41 @@ class PolicySettings(BaseModel):
     temperature: float = 1.0
     exploration: str = "epsilon_greedy"
 
-    @field_validator("alpha", "gamma", "epsilon")
-    def _policy_unit_range(
-        cls,
-        v: float,
-        values: dict[str, Any] | FieldValidationInfo | None = None,
-        config: Any | None = None,
-        field: Any | None = None,
-        info: FieldValidationInfo | None = None,
-    ) -> float:
-        """Ensure policy parameters constrained to the [0, 1] interval.
+    @staticmethod
+    def _field_name(*, info: Any | None = None, field: Any | None = None) -> str:
+        """Return the best-effort field name for validator error messages."""
 
-        The decorator resolves to :func:`pydantic.validator` on v1 and to
-        :func:`pydantic.field_validator` on v2. Pydantic v1 invokes the
-        callable with ``values``/``config``/``field`` arguments, whereas v2
-        provides a :class:`~pydantic.FieldValidationInfo`. The signature allows
-        either invocation and normalises the arguments for downstream logic.
-        """
+        if info is not None and getattr(info, "field_name", None):
+            return info.field_name  # type: ignore[return-value]
+        if field is not None and getattr(field, "name", None):
+            return field.name  # type: ignore[return-value]
+        return "value"
 
-        # When running under pydantic v2, the third positional argument is a
-        # ``FieldValidationInfo`` instance. Detect that case and remap it so the
-        # remainder of the function operates consistently across versions.
-        if isinstance(values, FieldValidationInfo):
-            info = values
-            values = None
+    if PYDANTIC_V2:
 
-        field_name = None
-        if info is not None and hasattr(info, "field_name"):
-            field_name = getattr(info, "field_name")
-        elif field is not None:
-            field_name = getattr(field, "name", None) or str(field)
-        if field_name is None:
-            field_name = "value"
+        @field_validator("alpha", "gamma", "epsilon")
+        def _policy_unit_range(
+            cls, v: float, info: FieldValidationInfo
+        ) -> float:  # pragma: no cover - simple validation
+            field_name = cls._field_name(info=info)
+            if not 0 <= v <= 1:
+                raise ValueError(f"{field_name} must be between 0 and 1")
+            return v
 
-        if not 0 <= v <= 1:
-            raise ValueError(f"{field_name} must be between 0 and 1")
-        return v
+    else:  # pragma: no cover - compatibility for pydantic<2
+
+        @field_validator("alpha", "gamma", "epsilon")
+        def _policy_unit_range(
+            cls,
+            v: float,
+            values: dict[str, Any],
+            config: Any,
+            field: Any,
+        ) -> float:
+            field_name = cls._field_name(field=field)
+            if not 0 <= v <= 1:
+                raise ValueError(f"{field_name} must be between 0 and 1")
+            return v
 
     @field_validator("temperature")
     def _policy_temperature(cls, v: float) -> float:
