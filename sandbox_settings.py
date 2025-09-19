@@ -2,6 +2,7 @@ from __future__ import annotations
 
 """Pydantic settings for sandbox utilities."""
 
+import inspect
 import json
 import os
 from typing import Any
@@ -28,6 +29,16 @@ try:  # pragma: no cover - compatibility shim
     from pydantic import field_validator
 except Exception:  # pragma: no cover
     from pydantic import validator as field_validator  # type: ignore
+
+FIELD_VALIDATOR_KWARGS: dict[str, Any]
+try:
+    FIELD_VALIDATOR_KWARGS = (
+        {"allow_reuse": True}
+        if "allow_reuse" in inspect.signature(field_validator).parameters
+        else {}
+    )
+except (ValueError, TypeError):  # pragma: no cover - signature introspection failure
+    FIELD_VALIDATOR_KWARGS = {}
 
 SELF_CODING_ROI_DROP: float = float(os.getenv("SELF_CODING_ROI_DROP", "-0.1"))
 SELF_CODING_ERROR_INCREASE: float = float(
@@ -121,6 +132,7 @@ class ROISettings(BaseModel):
         "entropy_threshold",
         "entropy_plateau_threshold",
         "entropy_ceiling_threshold",
+        **FIELD_VALIDATOR_KWARGS,
     )
     def _check_unit_range(cls, v: float | None, info: Any) -> float | None:
         if v is not None and not 0 <= v <= 1:
@@ -131,6 +143,7 @@ class ROISettings(BaseModel):
         "compounding_weight",
         "min_integration_roi",
         "entropy_weight",
+        **FIELD_VALIDATOR_KWARGS,
     )
     def _check_non_negative(cls, v: float, info: Any) -> float:
         if v < 0:
@@ -142,13 +155,18 @@ class ROISettings(BaseModel):
         "stagnation_threshold",
         "momentum_dev_multiplier",
         "roi_stagnation_dev_multiplier",
+        **FIELD_VALIDATOR_KWARGS,
     )
     def _check_positive_float(cls, v: float, info: Any) -> float:
         if v <= 0:
             raise ValueError(f"{info.field_name} must be positive")
         return v
 
-    @field_validator("entropy_plateau_consecutive", "entropy_ceiling_consecutive")
+    @field_validator(
+        "entropy_plateau_consecutive",
+        "entropy_ceiling_consecutive",
+        **FIELD_VALIDATOR_KWARGS,
+    )
     def _check_positive(cls, v: int | None, info: Any) -> int | None:
         if v is not None and v <= 0:
             raise ValueError(f"{info.field_name} must be a positive integer")
@@ -159,6 +177,7 @@ class ROISettings(BaseModel):
         "entropy_window",
         "stagnation_cycles",
         "momentum_window",
+        **FIELD_VALIDATOR_KWARGS,
     )
     def _check_positive_int(cls, v: int, info: Any) -> int:
         if v <= 0:
