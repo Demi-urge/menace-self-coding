@@ -535,37 +535,109 @@ class ActorCriticSettings(BaseModel):
     eval_interval: int = 100
     checkpoint_interval: int = 100
 
-    @field_validator(
-        "actor_lr",
-        "critic_lr",
-        "gamma",
-        "epsilon",
-        "epsilon_decay",
-    )
-    def _ac_unit_range(cls, v: float, info: Any) -> float:
-        if v <= 0:
-            raise ValueError(f"{info.field_name} must be positive")
-        if info.field_name in {"gamma", "epsilon", "epsilon_decay"} and v > 1:
-            raise ValueError(f"{info.field_name} must be between 0 and 1")
-        return v
+    @staticmethod
+    def _field_name(*, info: Any | None = None, field: Any | None = None) -> str:
+        """Return a best-effort field name for error messaging."""
 
-    @field_validator("buffer_size", "batch_size")
-    def _ac_positive_int(cls, v: int, info: Any) -> int:
-        if v <= 0:
-            raise ValueError(f"{info.field_name} must be a positive integer")
-        return v
+        if info is not None and getattr(info, "field_name", None):
+            return info.field_name
+        if field is not None and getattr(field, "name", None):
+            return field.name
+        return "value"
 
-    @field_validator("reward_scale")
-    def _ac_positive_float(cls, v: float) -> float:
-        if v <= 0:
-            raise ValueError("reward_scale must be positive")
-        return v
+    if PYDANTIC_V2:
 
-    @field_validator("eval_interval", "checkpoint_interval")
-    def _ac_interval(cls, v: int, info: Any) -> int:
-        if v <= 0:
-            raise ValueError(f"{info.field_name} must be a positive integer")
-        return v
+        @field_validator(
+            "actor_lr",
+            "critic_lr",
+            "gamma",
+            "epsilon",
+            "epsilon_decay",
+        )
+        def _ac_unit_range(cls, v: float, info: FieldValidationInfo) -> float:
+            field_name = cls._field_name(info=info)
+            if v <= 0:
+                raise ValueError(f"{field_name} must be positive")
+            if field_name in {"gamma", "epsilon", "epsilon_decay"} and v > 1:
+                raise ValueError(f"{field_name} must be between 0 and 1")
+            return v
+
+        @field_validator("buffer_size", "batch_size")
+        def _ac_positive_int(cls, v: int, info: FieldValidationInfo) -> int:
+            field_name = cls._field_name(info=info)
+            if v <= 0:
+                raise ValueError(f"{field_name} must be a positive integer")
+            return v
+
+        @field_validator("reward_scale")
+        def _ac_positive_float(cls, v: float) -> float:
+            if v <= 0:
+                raise ValueError("reward_scale must be positive")
+            return v
+
+        @field_validator("eval_interval", "checkpoint_interval")
+        def _ac_interval(cls, v: int, info: FieldValidationInfo) -> int:
+            field_name = cls._field_name(info=info)
+            if v <= 0:
+                raise ValueError(f"{field_name} must be a positive integer")
+            return v
+
+    else:  # pragma: no cover - compatibility for pydantic<2
+
+        @field_validator(
+            "actor_lr",
+            "critic_lr",
+            "gamma",
+            "epsilon",
+            "epsilon_decay",
+        )
+        def _ac_unit_range(
+            cls,
+            v: float,
+            values: dict[str, Any],
+            config: Any,
+            field: Any,
+        ) -> float:
+            field_name = cls._field_name(field=field)
+            if v <= 0:
+                raise ValueError(f"{field_name} must be positive")
+            if field_name in {"gamma", "epsilon", "epsilon_decay"} and v > 1:
+                raise ValueError(f"{field_name} must be between 0 and 1")
+            return v
+
+        @field_validator("buffer_size", "batch_size")
+        def _ac_positive_int(
+            cls,
+            v: int,
+            values: dict[str, Any],
+            config: Any,
+            field: Any,
+        ) -> int:
+            field_name = cls._field_name(field=field)
+            if v <= 0:
+                raise ValueError(f"{field_name} must be a positive integer")
+            return v
+
+        @field_validator("reward_scale")
+        def _ac_positive_float(
+            cls, v: float, values: dict[str, Any], config: Any, field: Any
+        ) -> float:
+            if v <= 0:
+                raise ValueError("reward_scale must be positive")
+            return v
+
+        @field_validator("eval_interval", "checkpoint_interval")
+        def _ac_interval(
+            cls,
+            v: int,
+            values: dict[str, Any],
+            config: Any,
+            field: Any,
+        ) -> int:
+            field_name = cls._field_name(field=field)
+            if v <= 0:
+                raise ValueError(f"{field_name} must be a positive integer")
+            return v
 
 
 class PolicySettings(BaseModel):
