@@ -59,6 +59,45 @@ DEFAULT_SEVERITY_SCORE_MAP: dict[str, float] = {
 }
 
 
+def _validator_field_name(*args: Any, **kwargs: Any) -> str:
+    """Best-effort extraction of the current field name for validator errors."""
+
+    candidates: list[Any] = []
+    info = kwargs.get("info")
+    if info is not None:
+        candidates.append(info)
+    # Pydantic v2 passes ``info`` as the first positional argument. For v1 we
+    # may receive ``values``/``config``/``field``. We inspect everything for a
+    # usable field attribute while keeping order stable so ``info`` wins.
+    candidates.extend(args)
+    field = kwargs.get("field")
+    if field is not None:
+        candidates.append(field)
+
+    for candidate in candidates:
+        if candidate is None:
+            continue
+        field_name = getattr(candidate, "field_name", None)
+        if field_name:
+            return str(field_name)
+        alias = getattr(candidate, "alias", None)
+        if alias:
+            return str(alias)
+        name = getattr(candidate, "name", None)
+        if name:
+            return str(name)
+        field_info = getattr(candidate, "field_info", None)
+        if field_info is not None:
+            alias = getattr(field_info, "alias", None)
+            if alias:
+                return str(alias)
+            name = getattr(field_info, "name", None)
+            if name:
+                return str(name)
+
+    return "value"
+
+
 def normalize_workflow_tests(value: Any) -> list[str]:
     """Coerce arbitrary input into a list of workflow test selectors."""
 
@@ -134,9 +173,15 @@ class ROISettings(BaseModel):
         "entropy_ceiling_threshold",
         **FIELD_VALIDATOR_KWARGS,
     )
-    def _check_unit_range(cls, v: float | None, info: Any) -> float | None:
+    def _check_unit_range(
+        cls,
+        v: float | None,
+        *validator_args: Any,
+        **validator_kwargs: Any,
+    ) -> float | None:
         if v is not None and not 0 <= v <= 1:
-            raise ValueError(f"{info.field_name} must be between 0 and 1")
+            field_name = _validator_field_name(*validator_args, **validator_kwargs)
+            raise ValueError(f"{field_name} must be between 0 and 1")
         return v
 
     @field_validator(
@@ -145,9 +190,15 @@ class ROISettings(BaseModel):
         "entropy_weight",
         **FIELD_VALIDATOR_KWARGS,
     )
-    def _check_non_negative(cls, v: float, info: Any) -> float:
+    def _check_non_negative(
+        cls,
+        v: float,
+        *validator_args: Any,
+        **validator_kwargs: Any,
+    ) -> float:
         if v < 0:
-            raise ValueError(f"{info.field_name} must be non-negative")
+            field_name = _validator_field_name(*validator_args, **validator_kwargs)
+            raise ValueError(f"{field_name} must be non-negative")
         return v
 
     @field_validator(
@@ -157,9 +208,15 @@ class ROISettings(BaseModel):
         "roi_stagnation_dev_multiplier",
         **FIELD_VALIDATOR_KWARGS,
     )
-    def _check_positive_float(cls, v: float, info: Any) -> float:
+    def _check_positive_float(
+        cls,
+        v: float,
+        *validator_args: Any,
+        **validator_kwargs: Any,
+    ) -> float:
         if v <= 0:
-            raise ValueError(f"{info.field_name} must be positive")
+            field_name = _validator_field_name(*validator_args, **validator_kwargs)
+            raise ValueError(f"{field_name} must be positive")
         return v
 
     @field_validator(
@@ -167,9 +224,15 @@ class ROISettings(BaseModel):
         "entropy_ceiling_consecutive",
         **FIELD_VALIDATOR_KWARGS,
     )
-    def _check_positive(cls, v: int | None, info: Any) -> int | None:
+    def _check_positive(
+        cls,
+        v: int | None,
+        *validator_args: Any,
+        **validator_kwargs: Any,
+    ) -> int | None:
         if v is not None and v <= 0:
-            raise ValueError(f"{info.field_name} must be a positive integer")
+            field_name = _validator_field_name(*validator_args, **validator_kwargs)
+            raise ValueError(f"{field_name} must be a positive integer")
         return v
 
     @field_validator(
@@ -179,9 +242,15 @@ class ROISettings(BaseModel):
         "momentum_window",
         **FIELD_VALIDATOR_KWARGS,
     )
-    def _check_positive_int(cls, v: int, info: Any) -> int:
+    def _check_positive_int(
+        cls,
+        v: int,
+        *validator_args: Any,
+        **validator_kwargs: Any,
+    ) -> int:
         if v <= 0:
-            raise ValueError(f"{info.field_name} must be a positive integer")
+            field_name = _validator_field_name(*validator_args, **validator_kwargs)
+            raise ValueError(f"{field_name} must be a positive integer")
         return v
 
 
@@ -251,9 +320,15 @@ class SynergySettings(BaseModel):
         "variance_confidence",
         "gamma",
     )
-    def _synergy_unit_range(cls, v: float | None, info: Any) -> float | None:
+    def _synergy_unit_range(
+        cls,
+        v: float | None,
+        *validator_args: Any,
+        **validator_kwargs: Any,
+    ) -> float | None:
         if v is not None and not 0 <= v <= 1:
-            raise ValueError(f"{info.field_name} must be between 0 and 1")
+            field_name = _validator_field_name(*validator_args, **validator_kwargs)
+            raise ValueError(f"{field_name} must be between 0 and 1")
         return v
 
     @field_validator(
@@ -268,9 +343,15 @@ class SynergySettings(BaseModel):
         "target_sync",
         "python_max_replay",
     )
-    def _synergy_positive_int(cls, v: int | None, info: Any) -> int | None:
+    def _synergy_positive_int(
+        cls,
+        v: int | None,
+        *validator_args: Any,
+        **validator_kwargs: Any,
+    ) -> int | None:
         if v is not None and v <= 0:
-            raise ValueError(f"{info.field_name} must be a positive integer")
+            field_name = _validator_field_name(*validator_args, **validator_kwargs)
+            raise ValueError(f"{field_name} must be a positive integer")
         return v
 
     @field_validator(
@@ -285,9 +366,15 @@ class SynergySettings(BaseModel):
         "noise",
         "deviation_tolerance",
     )
-    def _synergy_non_negative(cls, v: float, info: Any) -> float:
+    def _synergy_non_negative(
+        cls,
+        v: float,
+        *validator_args: Any,
+        **validator_kwargs: Any,
+    ) -> float:
         if v < 0:
-            raise ValueError(f"{info.field_name} must be non-negative")
+            field_name = _validator_field_name(*validator_args, **validator_kwargs)
+            raise ValueError(f"{field_name} must be non-negative")
         return v
 
     @field_validator("strategy")
@@ -317,9 +404,15 @@ class AlignmentSettings(BaseModel):
         "improvement_warning_threshold",
         "improvement_failure_threshold",
     )
-    def _alignment_unit_range(cls, v: float, info: Any) -> float:
+    def _alignment_unit_range(
+        cls,
+        v: float,
+        *validator_args: Any,
+        **validator_kwargs: Any,
+    ) -> float:
         if not 0 <= v <= 1:
-            raise ValueError(f"{info.field_name} must be between 0 and 1")
+            field_name = _validator_field_name(*validator_args, **validator_kwargs)
+            raise ValueError(f"{field_name} must be between 0 and 1")
         return v
 
 
@@ -365,17 +458,29 @@ class ActorCriticSettings(BaseModel):
         "epsilon",
         "epsilon_decay",
     )
-    def _ac_unit_range(cls, v: float, info: Any) -> float:
+    def _ac_unit_range(
+        cls,
+        v: float,
+        *validator_args: Any,
+        **validator_kwargs: Any,
+    ) -> float:
+        field_name = _validator_field_name(*validator_args, **validator_kwargs)
         if v <= 0:
-            raise ValueError(f"{info.field_name} must be positive")
-        if info.field_name in {"gamma", "epsilon", "epsilon_decay"} and v > 1:
-            raise ValueError(f"{info.field_name} must be between 0 and 1")
+            raise ValueError(f"{field_name} must be positive")
+        if field_name in {"gamma", "epsilon", "epsilon_decay"} and v > 1:
+            raise ValueError(f"{field_name} must be between 0 and 1")
         return v
 
     @field_validator("buffer_size", "batch_size")
-    def _ac_positive_int(cls, v: int, info: Any) -> int:
+    def _ac_positive_int(
+        cls,
+        v: int,
+        *validator_args: Any,
+        **validator_kwargs: Any,
+    ) -> int:
         if v <= 0:
-            raise ValueError(f"{info.field_name} must be a positive integer")
+            field_name = _validator_field_name(*validator_args, **validator_kwargs)
+            raise ValueError(f"{field_name} must be a positive integer")
         return v
 
     @field_validator("reward_scale")
@@ -385,9 +490,15 @@ class ActorCriticSettings(BaseModel):
         return v
 
     @field_validator("eval_interval", "checkpoint_interval")
-    def _ac_interval(cls, v: int, info: Any) -> int:
+    def _ac_interval(
+        cls,
+        v: int,
+        *validator_args: Any,
+        **validator_kwargs: Any,
+    ) -> int:
         if v <= 0:
-            raise ValueError(f"{info.field_name} must be a positive integer")
+            field_name = _validator_field_name(*validator_args, **validator_kwargs)
+            raise ValueError(f"{field_name} must be a positive integer")
         return v
 
 
@@ -401,9 +512,15 @@ class PolicySettings(BaseModel):
     exploration: str = "epsilon_greedy"
 
     @field_validator("alpha", "gamma", "epsilon")
-    def _policy_unit_range(cls, v: float, info: Any) -> float:
+    def _policy_unit_range(
+        cls,
+        v: float,
+        *validator_args: Any,
+        **validator_kwargs: Any,
+    ) -> float:
         if not 0 <= v <= 1:
-            raise ValueError(f"{info.field_name} must be between 0 and 1")
+            field_name = _validator_field_name(*validator_args, **validator_kwargs)
+            raise ValueError(f"{field_name} must be between 0 and 1")
         return v
 
     @field_validator("temperature")
@@ -515,15 +632,27 @@ class SandboxSettings(BaseSettings):
         "roi_stagnation_threshold",
         "roi_momentum_dev_multiplier",
     )
-    def _roi_positive_float(cls, v: float, info: Any) -> float:
+    def _roi_positive_float(
+        cls,
+        v: float,
+        *validator_args: Any,
+        **validator_kwargs: Any,
+    ) -> float:
         if v <= 0:
-            raise ValueError(f"{info.field_name} must be positive")
+            field_name = _validator_field_name(*validator_args, **validator_kwargs)
+            raise ValueError(f"{field_name} must be positive")
         return v
 
     @field_validator("error_overfit_percentile", "entropy_overfit_percentile")
-    def _overfit_percentile_range(cls, v: float, info: Any) -> float:
+    def _overfit_percentile_range(
+        cls,
+        v: float,
+        *validator_args: Any,
+        **validator_kwargs: Any,
+    ) -> float:
         if not 0 < v <= 1:
-            raise ValueError(f"{info.field_name} must be between 0 and 1")
+            field_name = _validator_field_name(*validator_args, **validator_kwargs)
+            raise ValueError(f"{field_name} must be between 0 and 1")
         return v
 
     @field_validator(
@@ -540,9 +669,15 @@ class SandboxSettings(BaseSettings):
         "scenario_patch_dev_multiplier",
         "scenario_rerun_dev_multiplier",
     )
-    def _baseline_non_negative(cls, v: float, info: Any) -> float:
+    def _baseline_non_negative(
+        cls,
+        v: float,
+        *validator_args: Any,
+        **validator_kwargs: Any,
+    ) -> float:
         if v < 0:
-            raise ValueError(f"{info.field_name} must be non-negative")
+            field_name = _validator_field_name(*validator_args, **validator_kwargs)
+            raise ValueError(f"{field_name} must be non-negative")
         return v
     menace_env_file: str = Field(
         (resolve_path(".") / ".env").as_posix(), env="MENACE_ENV_FILE"
@@ -1502,9 +1637,15 @@ class SandboxSettings(BaseSettings):
         return v
 
     @field_validator("policy_alpha", "policy_gamma", "policy_epsilon")
-    def _validate_policy_unit_range(cls, v: float, info: Any) -> float:
+    def _validate_policy_unit_range(
+        cls,
+        v: float,
+        *validator_args: Any,
+        **validator_kwargs: Any,
+    ) -> float:
         if not 0 <= v <= 1:
-            raise ValueError(f"{info.field_name} must be between 0 and 1")
+            field_name = _validator_field_name(*validator_args, **validator_kwargs)
+            raise ValueError(f"{field_name} must be between 0 and 1")
         return v
 
     @field_validator("policy_temperature")
@@ -1532,15 +1673,27 @@ class SandboxSettings(BaseSettings):
         return v
 
     @field_validator("meta_search_depth", "meta_beam_width")
-    def _validate_meta_search_params(cls, v: int, info: Any) -> int:
+    def _validate_meta_search_params(
+        cls,
+        v: int,
+        *validator_args: Any,
+        **validator_kwargs: Any,
+    ) -> int:
         if v <= 0:
-            raise ValueError(f"{info.field_name} must be a positive integer")
+            field_name = _validator_field_name(*validator_args, **validator_kwargs)
+            raise ValueError(f"{field_name} must be a positive integer")
         return v
 
     @field_validator("meta_planning_interval", "meta_planning_period")
-    def _validate_meta_intervals(cls, v: int, info: Any) -> int:
+    def _validate_meta_intervals(
+        cls,
+        v: int,
+        *validator_args: Any,
+        **validator_kwargs: Any,
+    ) -> int:
         if v <= 0:
-            raise ValueError(f"{info.field_name} must be a positive integer")
+            field_name = _validator_field_name(*validator_args, **validator_kwargs)
+            raise ValueError(f"{field_name} must be a positive integer")
         return v
 
     @field_validator(
@@ -1550,9 +1703,15 @@ class SandboxSettings(BaseSettings):
         "meta_domain_penalty",
         "orphan_reuse_threshold",
     )
-    def _validate_non_negative(cls, v: float, info: Any) -> float:
+    def _validate_non_negative(
+        cls,
+        v: float,
+        *validator_args: Any,
+        **validator_kwargs: Any,
+    ) -> float:
         if v < 0:
-            raise ValueError(f"{info.field_name} must be non-negative")
+            field_name = _validator_field_name(*validator_args, **validator_kwargs)
+            raise ValueError(f"{field_name} must be non-negative")
         return v
 
     @field_validator("auto_train_interval")
@@ -1562,9 +1721,15 @@ class SandboxSettings(BaseSettings):
         return v
 
     @field_validator("flakiness_runs", "test_run_retries")
-    def _validate_positive_int(cls, v: int, info: Any) -> int:
+    def _validate_positive_int(
+        cls,
+        v: int,
+        *validator_args: Any,
+        **validator_kwargs: Any,
+    ) -> int:
         if v <= 0:
-            raise ValueError(f"{info.field_name} must be a positive integer")
+            field_name = _validator_field_name(*validator_args, **validator_kwargs)
+            raise ValueError(f"{field_name} must be a positive integer")
         return v
 
     @field_validator(
@@ -1573,9 +1738,15 @@ class SandboxSettings(BaseSettings):
         "backup_rotation_count",
         "checkpoint_retention",
     )
-    def _validate_positive_training(cls, v: int, info: Any) -> int:
+    def _validate_positive_training(
+        cls,
+        v: int,
+        *validator_args: Any,
+        **validator_kwargs: Any,
+    ) -> int:
         if v <= 0:
-            raise ValueError(f"{info.field_name} must be a positive integer")
+            field_name = _validator_field_name(*validator_args, **validator_kwargs)
+            raise ValueError(f"{field_name} must be a positive integer")
         return v
 
     @field_validator(
@@ -1586,9 +1757,15 @@ class SandboxSettings(BaseSettings):
         "roi_threshold_k",
         "synergy_threshold_k",
     )
-    def _validate_positive_float(cls, v: float, info: Any) -> float:
+    def _validate_positive_float(
+        cls,
+        v: float,
+        *validator_args: Any,
+        **validator_kwargs: Any,
+    ) -> float:
         if v <= 0:
-            raise ValueError(f"{info.field_name} must be positive")
+            field_name = _validator_field_name(*validator_args, **validator_kwargs)
+            raise ValueError(f"{field_name} must be positive")
         return v
 
     test_redundant_modules: bool = Field(
@@ -1850,9 +2027,15 @@ class SandboxSettings(BaseSettings):
         "entropy_weight_scale",
         "momentum_weight_scale",
     )
-    def _validate_delta_weights(cls, v: float, info: Any) -> float:
+    def _validate_delta_weights(
+        cls,
+        v: float,
+        *validator_args: Any,
+        **validator_kwargs: Any,
+    ) -> float:
         if v < 0:
-            raise ValueError(f"{info.field_name} must be non-negative")
+            field_name = _validator_field_name(*validator_args, **validator_kwargs)
+            raise ValueError(f"{field_name} must be non-negative")
         return v
 
     @field_validator("momentum_stagnation_dev_multiplier")
@@ -2330,9 +2513,15 @@ class SandboxSettings(BaseSettings):
     )
 
     @field_validator("baseline_window", "stagnation_iters")
-    def _check_positive_int(cls, v: int, info: Any) -> int:
+    def _check_positive_int(
+        cls,
+        v: int,
+        *validator_args: Any,
+        **validator_kwargs: Any,
+    ) -> int:
         if v <= 0:
-            raise ValueError(f"{info.field_name} must be a positive integer")
+            field_name = _validator_field_name(*validator_args, **validator_kwargs)
+            raise ValueError(f"{field_name} must be a positive integer")
         return v
 
     @field_validator("delta_margin")
