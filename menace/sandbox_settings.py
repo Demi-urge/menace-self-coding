@@ -487,9 +487,16 @@ class AlignmentSettings(BaseModel):
         "improvement_warning_threshold",
         "improvement_failure_threshold",
     )
-    def _alignment_unit_range(cls, v: float, info: Any) -> float:
+    def _alignment_unit_range(
+        cls,
+        v: float,
+        values: dict[str, Any],
+        config: Any,
+        field: Any,
+    ) -> float:
+        field_name = getattr(field, "name", getattr(field, "field_name", "value"))
         if not 0 <= v <= 1:
-            raise ValueError(f"{info.field_name} must be between 0 and 1")
+            raise ValueError(f"{field_name} must be between 0 and 1")
         return v
 
 
