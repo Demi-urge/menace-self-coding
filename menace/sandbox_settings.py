@@ -650,9 +650,31 @@ class PolicySettings(BaseModel):
     exploration: str = "epsilon_greedy"
 
     @field_validator("alpha", "gamma", "epsilon")
-    def _policy_unit_range(cls, v: float, info: Any) -> float:
+    def _policy_unit_range(
+        cls,
+        v: float,
+        info: FieldValidationInfo | dict[str, Any] | None = None,
+        config: Any | None = None,
+        field: Any | None = None,
+    ) -> float:
+        """Ensure policy parameters constrained to the [0, 1] interval.
+
+        Pydantic v1 validators receive ``values``, ``config`` and ``field``
+        arguments, while v2 provides a ``FieldValidationInfo`` instance. The
+        implementation accepts both call signatures so the validation works
+        across versions without import-time errors.
+        """
+
+        field_name = None
+        if info is not None and hasattr(info, "field_name"):
+            field_name = getattr(info, "field_name")
+        elif field is not None:
+            field_name = getattr(field, "name", None) or str(field)
+        if field_name is None:
+            field_name = "value"
+
         if not 0 <= v <= 1:
-            raise ValueError(f"{info.field_name} must be between 0 and 1")
+            raise ValueError(f"{field_name} must be between 0 and 1")
         return v
 
     @field_validator("temperature")
