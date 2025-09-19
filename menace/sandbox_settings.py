@@ -401,7 +401,11 @@ class SynergySettings(BaseModel):
             "gamma",
         )
         def _synergy_unit_range(
-            cls, v: float | None, values: dict[str, Any], field: Any, **_: Any
+            cls,
+            v: float | None,
+            values: dict[str, Any],
+            config: Any,
+            field: Any,
         ) -> float | None:
             field_name = getattr(field, "name", "value")
             if v is not None and not 0 <= v <= 1:
@@ -421,7 +425,11 @@ class SynergySettings(BaseModel):
             "python_max_replay",
         )
         def _synergy_positive_int(
-            cls, v: int | None, values: dict[str, Any], field: Any, **_: Any
+            cls,
+            v: int | None,
+            values: dict[str, Any],
+            config: Any,
+            field: Any,
         ) -> int | None:
             field_name = getattr(field, "name", "value")
             if v is not None and v <= 0:
@@ -441,7 +449,11 @@ class SynergySettings(BaseModel):
             "deviation_tolerance",
         )
         def _synergy_non_negative(
-            cls, v: float, values: dict[str, Any], field: Any, **_: Any
+            cls,
+            v: float,
+            values: dict[str, Any],
+            config: Any,
+            field: Any,
         ) -> float:
             field_name = getattr(field, "name", "value")
             if v < 0:
