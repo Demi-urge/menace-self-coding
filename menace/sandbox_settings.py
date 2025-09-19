@@ -653,17 +653,26 @@ class PolicySettings(BaseModel):
     def _policy_unit_range(
         cls,
         v: float,
-        info: FieldValidationInfo | dict[str, Any] | None = None,
+        values: dict[str, Any] | FieldValidationInfo | None = None,
         config: Any | None = None,
         field: Any | None = None,
+        info: FieldValidationInfo | None = None,
     ) -> float:
         """Ensure policy parameters constrained to the [0, 1] interval.
 
-        Pydantic v1 validators receive ``values``, ``config`` and ``field``
-        arguments, while v2 provides a ``FieldValidationInfo`` instance. The
-        implementation accepts both call signatures so the validation works
-        across versions without import-time errors.
+        The decorator resolves to :func:`pydantic.validator` on v1 and to
+        :func:`pydantic.field_validator` on v2. Pydantic v1 invokes the
+        callable with ``values``/``config``/``field`` arguments, whereas v2
+        provides a :class:`~pydantic.FieldValidationInfo`. The signature allows
+        either invocation and normalises the arguments for downstream logic.
         """
+
+        # When running under pydantic v2, the third positional argument is a
+        # ``FieldValidationInfo`` instance. Detect that case and remap it so the
+        # remainder of the function operates consistently across versions.
+        if isinstance(values, FieldValidationInfo):
+            info = values
+            values = None
 
         field_name = None
         if info is not None and hasattr(info, "field_name"):
