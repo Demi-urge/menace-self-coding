@@ -699,7 +699,7 @@ class PolicySettings(BaseModel):
             raise ValueError(f"{field_name} must be between 0 and 1")
         return v
 
-    @field_validator("temperature")
+    @field_validator("temperature", **FIELD_VALIDATOR_KWARGS)
     def _policy_temperature(cls, v: float) -> float:
         if v <= 0:
             raise ValueError("temperature must be positive")
