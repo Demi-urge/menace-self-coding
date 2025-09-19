@@ -2,6 +2,7 @@ from __future__ import annotations
 
 """Pydantic settings for sandbox utilities."""
 
+import inspect
 import json
 import os
 from typing import Any
@@ -30,6 +31,15 @@ except Exception:  # pragma: no cover
     from pydantic import validator as field_validator  # type: ignore
 
     FieldValidationInfo = Any  # type: ignore[misc,assignment]
+
+try:
+    FIELD_VALIDATOR_KWARGS = (
+        {"allow_reuse": True}
+        if "allow_reuse" in inspect.signature(field_validator).parameters
+        else {}
+    )
+except (ValueError, TypeError):  # pragma: no cover - signature introspection failure
+    FIELD_VALIDATOR_KWARGS = {}
 
 SELF_CODING_ROI_DROP: float = float(os.getenv("SELF_CODING_ROI_DROP", "-0.1"))
 SELF_CODING_ERROR_INCREASE: float = float(
@@ -787,31 +797,31 @@ class SandboxSettings(BaseSettings):
             return field.name  # type: ignore[return-value]
         return "value"
 
-    @field_validator("baseline_window")
+    @field_validator("baseline_window", **FIELD_VALIDATOR_KWARGS)
     def _baseline_window_range(cls, v: int) -> int:
         if not 5 <= v <= 10:
             raise ValueError("baseline_window must be between 5 and 10")
         return v
 
-    @field_validator("relevancy_history_min_length")
+    @field_validator("relevancy_history_min_length", **FIELD_VALIDATOR_KWARGS)
     def _relevancy_history_non_negative(cls, v: int) -> int:
         if v < 0:
             raise ValueError("relevancy_history_min_length must be non-negative")
         return v
 
-    @field_validator("roi_baseline_window")
+    @field_validator("roi_baseline_window", **FIELD_VALIDATOR_KWARGS)
     def _roi_baseline_window_positive(cls, v: int) -> int:
         if v <= 0:
             raise ValueError("roi_baseline_window must be positive")
         return v
 
-    @field_validator("roi_momentum_window")
+    @field_validator("roi_momentum_window", **FIELD_VALIDATOR_KWARGS)
     def _roi_momentum_window_positive(cls, v: int) -> int:
         if v <= 0:
             raise ValueError("roi_momentum_window must be positive")
         return v
 
-    @field_validator("roi_stagnation_cycles")
+    @field_validator("roi_stagnation_cycles", **FIELD_VALIDATOR_KWARGS)
     def _roi_stagnation_cycles_positive(cls, v: int) -> int:
         if v <= 0:
             raise ValueError("roi_stagnation_cycles must be positive")
@@ -823,6 +833,7 @@ class SandboxSettings(BaseSettings):
             "roi_deviation_tolerance",
             "roi_stagnation_threshold",
             "roi_momentum_dev_multiplier",
+            **FIELD_VALIDATOR_KWARGS,
         )
         def _roi_positive_float(
             cls, v: float, info: FieldValidationInfo
@@ -832,7 +843,11 @@ class SandboxSettings(BaseSettings):
                 raise ValueError(f"{field_name} must be positive")
             return v
 
-        @field_validator("error_overfit_percentile", "entropy_overfit_percentile")
+        @field_validator(
+            "error_overfit_percentile",
+            "entropy_overfit_percentile",
+            **FIELD_VALIDATOR_KWARGS,
+        )
         def _overfit_percentile_range(
             cls, v: float, info: FieldValidationInfo
         ) -> float:
@@ -854,6 +869,7 @@ class SandboxSettings(BaseSettings):
             "scenario_alert_dev_multiplier",
             "scenario_patch_dev_multiplier",
             "scenario_rerun_dev_multiplier",
+            **FIELD_VALIDATOR_KWARGS,
         )
         def _baseline_non_negative(
             cls, v: float, info: FieldValidationInfo
@@ -869,6 +885,7 @@ class SandboxSettings(BaseSettings):
             "roi_deviation_tolerance",
             "roi_stagnation_threshold",
             "roi_momentum_dev_multiplier",
+            **FIELD_VALIDATOR_KWARGS,
         )
         def _roi_positive_float(
             cls,
@@ -885,6 +902,7 @@ class SandboxSettings(BaseSettings):
         @field_validator(
             "error_overfit_percentile",
             "entropy_overfit_percentile",
+            **FIELD_VALIDATOR_KWARGS,
         )
         def _overfit_percentile_range(
             cls,
@@ -911,6 +929,7 @@ class SandboxSettings(BaseSettings):
             "scenario_alert_dev_multiplier",
             "scenario_patch_dev_multiplier",
             "scenario_rerun_dev_multiplier",
+            **FIELD_VALIDATOR_KWARGS,
         )
         def _baseline_non_negative(
             cls,
