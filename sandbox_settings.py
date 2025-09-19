@@ -5,7 +5,7 @@ from __future__ import annotations
 import inspect
 import json
 import os
-from typing import Any
+from typing import Any, ClassVar
 from pathlib import Path
 
 import yaml
@@ -350,17 +350,26 @@ class BotThresholds(BaseModel):
     test_command: list[str] | None = None
     workflow_tests: list[str] = Field(default_factory=list)
 
+    _workflow_tests_validator_kwargs: ClassVar[dict[str, Any]] = dict(
+        FIELD_VALIDATOR_KWARGS
+    )
     if PYDANTIC_V2:
-
-        @field_validator("workflow_tests", mode="before")
-        def _validate_workflow_tests(cls, value: Any) -> list[str]:
-            return normalize_workflow_tests(value)
-
+        _workflow_tests_validator_kwargs["mode"] = "before"
     else:  # pragma: no cover - compatibility for pydantic<2
+        _workflow_tests_validator_kwargs["pre"] = True
 
-        @field_validator("workflow_tests", pre=True)
-        def _validate_workflow_tests(cls, value: Any) -> list[str]:
-            return normalize_workflow_tests(value)
+    @field_validator("workflow_tests", **_workflow_tests_validator_kwargs)
+    @_apply_validator_signature
+    def _validate_workflow_tests(
+        cls,
+        value: Any,
+        *,
+        values: dict[str, Any] | None = None,
+        config: Any | None = None,
+        field: Any | None = None,
+        info: Any | None = None,
+    ) -> list[str]:
+        return normalize_workflow_tests(value)
 
 
 class SynergySettings(BaseModel):
