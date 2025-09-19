@@ -557,13 +557,13 @@ class AutoMergeSettings(BaseModel):
     roi_threshold: float = 0.0
     coverage_threshold: float = 1.0
 
-    @field_validator("roi_threshold")
+    @field_validator("roi_threshold", **FIELD_VALIDATOR_KWARGS)
     def _roi_non_negative(cls, v: float) -> float:
         if v < 0:
             raise ValueError("roi_threshold must be non-negative")
         return v
 
-    @field_validator("coverage_threshold")
+    @field_validator("coverage_threshold", **FIELD_VALIDATOR_KWARGS)
     def _cov_unit_range(cls, v: float) -> float:
         if not 0 <= v <= 1:
             raise ValueError("coverage_threshold must be between 0 and 1")
