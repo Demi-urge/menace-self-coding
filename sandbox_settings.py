@@ -592,6 +592,7 @@ class ActorCriticSettings(BaseModel):
         "gamma",
         "epsilon",
         "epsilon_decay",
+        **FIELD_VALIDATOR_KWARGS,
     )
     @_apply_validator_signature
     def _ac_unit_range(
@@ -615,7 +616,7 @@ class ActorCriticSettings(BaseModel):
             raise ValueError(f"{field_name} must be between 0 and 1")
         return v
 
-    @field_validator("buffer_size", "batch_size")
+    @field_validator("buffer_size", "batch_size", **FIELD_VALIDATOR_KWARGS)
     @_apply_validator_signature
     def _ac_positive_int(
         cls,
@@ -636,13 +637,17 @@ class ActorCriticSettings(BaseModel):
             raise ValueError(f"{field_name} must be a positive integer")
         return v
 
-    @field_validator("reward_scale")
+    @field_validator("reward_scale", **FIELD_VALIDATOR_KWARGS)
     def _ac_positive_float(cls, v: float) -> float:
         if v <= 0:
             raise ValueError("reward_scale must be positive")
         return v
 
-    @field_validator("eval_interval", "checkpoint_interval")
+    @field_validator(
+        "eval_interval",
+        "checkpoint_interval",
+        **FIELD_VALIDATOR_KWARGS,
+    )
     @_apply_validator_signature
     def _ac_interval(
         cls,
@@ -673,7 +678,7 @@ class PolicySettings(BaseModel):
     temperature: float = 1.0
     exploration: str = "epsilon_greedy"
 
-    @field_validator("alpha", "gamma", "epsilon")
+    @field_validator("alpha", "gamma", "epsilon", **FIELD_VALIDATOR_KWARGS)
     @_apply_validator_signature
     def _policy_unit_range(
         cls,
