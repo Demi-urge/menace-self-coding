@@ -110,8 +110,13 @@ def _ensure_backfill_watcher(bus: "UnifiedEventBus" | None) -> None:
     if bus is None or _WATCH_THREAD is not None:
         return
     try:
+        backfill = EmbeddingBackfill()
+        watch_events = getattr(backfill, "watch_events", None)
+        if watch_events is None:
+            logger.info("embedding watcher unavailable; skipping startup")
+            return
         thread = threading.Thread(
-            target=EmbeddingBackfill().watch_events,
+            target=watch_events,
             kwargs={"bus": bus},
             daemon=True,
         )
