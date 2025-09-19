@@ -1294,14 +1294,27 @@ class SandboxSettings(BaseSettings):
         description="Consecutive failure limits per strategy before rotation.",
     )
 
-    @field_validator("strategy_failure_limits", mode="before")
-    def _parse_strategy_failure_limits(cls, v: Any) -> Any:
-        if isinstance(v, str):
-            try:
-                return json.loads(v)
-            except Exception:
-                return {}
-        return v
+    if PYDANTIC_V2:
+
+        @field_validator("strategy_failure_limits", mode="before")
+        def _parse_strategy_failure_limits(cls, v: Any) -> Any:
+            if isinstance(v, str):
+                try:
+                    return json.loads(v)
+                except Exception:
+                    return {}
+            return v
+
+    else:  # pragma: no cover - pydantic<2
+
+        @field_validator("strategy_failure_limits", pre=True)
+        def _parse_strategy_failure_limits(cls, v: Any) -> Any:  # type: ignore[override]
+            if isinstance(v, str):
+                try:
+                    return json.loads(v)
+                except Exception:
+                    return {}
+            return v
 
     @field_validator("prompt_roi_decay_rate")
     def _check_non_negative_decay(cls, v: float) -> float:
