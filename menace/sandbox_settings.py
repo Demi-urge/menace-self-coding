@@ -1271,7 +1271,7 @@ class SandboxSettings(BaseSettings):
         ),
     )
 
-    @field_validator("codex_fallback_strategy")
+    @field_validator("codex_fallback_strategy", **FIELD_VALIDATOR_KWARGS)
     def _codex_strategy_valid(cls, v: str) -> str:
         if v not in {"queue", "reroute"}:
             raise ValueError("codex_fallback_strategy must be 'queue' or 'reroute'")
@@ -1279,7 +1279,7 @@ class SandboxSettings(BaseSettings):
 
     if PYDANTIC_V2:
 
-        @field_validator("codex_retry_delays", mode="before")
+        @field_validator("codex_retry_delays", mode="before", **FIELD_VALIDATOR_KWARGS)
         def _parse_codex_retry_delays(cls, v: Any) -> Any:
             if isinstance(v, str):
                 try:
@@ -1292,7 +1292,7 @@ class SandboxSettings(BaseSettings):
 
     else:  # pragma: no cover - pydantic<2
 
-        @field_validator("codex_retry_delays", pre=True)
+        @field_validator("codex_retry_delays", pre=True, **FIELD_VALIDATOR_KWARGS)
         def _parse_codex_retry_delays(cls, v: Any) -> Any:  # type: ignore[override]
             if isinstance(v, str):
                 try:
