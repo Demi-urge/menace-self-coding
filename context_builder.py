@@ -22,22 +22,63 @@ from filelock import FileLock
 
 from redaction_utils import redact_text
 from snippet_compressor import compress_snippets
-from context_builder import handle_failure, PromptBuildError
+try:  # pragma: no cover - prefer package relative import when available
+    from menace.prompt_failure import handle_failure, PromptBuildError  # type: ignore
+except Exception:  # pragma: no cover - fallback for execution from source root
+    from prompt_failure import handle_failure, PromptBuildError  # type: ignore
 
-from .decorators import log_and_measure
-from .exceptions import MalformedPromptError, RateLimitError, VectorServiceError
-from .retriever import Retriever, PatchRetriever, FallbackResult
+try:  # pragma: no cover - prefer package relative import when available
+    from .decorators import log_and_measure  # type: ignore
+except Exception:  # pragma: no cover - fallback when executed from source root
+    from vector_service.decorators import log_and_measure  # type: ignore
+
+try:  # pragma: no cover - prefer package relative import when available
+    from .exceptions import (
+        MalformedPromptError,
+        RateLimitError,
+        VectorServiceError,
+    )
+except Exception:  # pragma: no cover - fallback when executed from source root
+    from vector_service.exceptions import (  # type: ignore
+        MalformedPromptError,
+        RateLimitError,
+        VectorServiceError,
+    )
+
+try:  # pragma: no cover - prefer package relative import when available
+    from .retriever import Retriever, PatchRetriever, FallbackResult  # type: ignore
+except Exception:  # pragma: no cover - fallback when executed from source root
+    from vector_service.retriever import (  # type: ignore
+        Retriever,
+        PatchRetriever,
+        FallbackResult,
+    )
 from config import ContextBuilderConfig
 from compliance.license_fingerprint import DENYLIST as _LICENSE_DENYLIST
-from .patch_logger import _VECTOR_RISK  # type: ignore
+try:  # pragma: no cover - prefer package relative import when available
+    from .patch_logger import _VECTOR_RISK  # type: ignore
+except Exception:  # pragma: no cover - fallback when executed from source root
+    from vector_service.patch_logger import _VECTOR_RISK  # type: ignore
 from patch_safety import PatchSafety
-from .ranking_utils import rank_patches
-from .embedding_backfill import (
-    ensure_embeddings_fresh,
-    StaleEmbeddingsError,
-    EmbeddingBackfill,
-    schedule_backfill,
-)
+try:  # pragma: no cover - prefer package relative import when available
+    from .ranking_utils import rank_patches  # type: ignore
+except Exception:  # pragma: no cover - fallback when executed from source root
+    from vector_service.ranking_utils import rank_patches  # type: ignore
+
+try:  # pragma: no cover - prefer package relative import when available
+    from .embedding_backfill import (  # type: ignore
+        ensure_embeddings_fresh,
+        StaleEmbeddingsError,
+        EmbeddingBackfill,
+        schedule_backfill,
+    )
+except Exception:  # pragma: no cover - fallback when executed from source root
+    from vector_service.embedding_backfill import (  # type: ignore
+        ensure_embeddings_fresh,
+        StaleEmbeddingsError,
+        EmbeddingBackfill,
+        schedule_backfill,
+    )
 from prompt_types import Prompt
 
 try:  # pragma: no cover - optional precise tokenizer
@@ -234,10 +275,13 @@ def _ensure_vector_service() -> None:
 try:  # pragma: no cover - optional dependency
     from . import ErrorResult  # type: ignore
 except Exception:  # pragma: no cover - fallback when undefined
-    class ErrorResult(Exception):
-        """Fallback ErrorResult used when vector service lacks explicit class."""
+    try:  # pragma: no cover - fallback to package import when available
+        from vector_service import ErrorResult  # type: ignore
+    except Exception:  # pragma: no cover - final fallback when unavailable
+        class ErrorResult(Exception):
+            """Fallback ErrorResult used when vector service lacks explicit class."""
 
-        pass
+            pass
 
 try:  # pragma: no cover - heavy dependency
     from menace_memory_manager import MenaceMemoryManager
@@ -333,8 +377,11 @@ class ContextBuilder:
 
                 try:  # package relative import when available
                     from .. import retrieval_ranker as _rr  # type: ignore
-                except Exception:  # pragma: no cover - fallback
-                    import retrieval_ranker as _rr  # type: ignore
+                except Exception:  # pragma: no cover - fallback when layout differs
+                    try:
+                        from menace import retrieval_ranker as _rr  # type: ignore
+                    except Exception:  # pragma: no cover - fallback to repo root
+                        import retrieval_ranker as _rr  # type: ignore
 
                 cfg = Path("retrieval_ranker.json")
                 model_path = cfg
