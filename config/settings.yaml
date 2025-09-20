@@ -1,0 +1,31 @@
+paths:
+  data_dir: /var/lib/igi/data
+  log_dir: /var/log/igi
+thresholds:
+  error: 0.5
+  alert: 0.9
+api_keys:
+  openai: "REPLACE_WITH_OPENAI_KEY"
+  serp: "REPLACE_WITH_SERP_API_KEY"
+logging:
+  verbosity: INFO
+vector:
+  dimensions: 512
+  distance_metric: cosine
+vector_store:
+  backend: faiss
+  path: vectors.index
+bot:
+  learning_rate: 0.01
+  epsilon: 0.1
+context_builder:
+  max_tokens: 800
+  db_weights: {}
+  ranking_weight: 1.0
+  roi_weight: 1.0
+  roi_tag_penalties:
+    high-ROI: -0.1
+    low-ROI: 0.2
+    bug-introduced: 0.5
+    needs-review: 0.3
+    blocked: 1.0

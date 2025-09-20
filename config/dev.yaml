@@ -1,0 +1,16 @@
+paths:
+  data_dir: ./data
+  log_dir: ./logs
+logging:
+  verbosity: DEBUG
+bot:
+  epsilon: 0.2
+api_keys:
+  openai: dev-openai-key
+  serp: dev-serp-key
+# Ranker scheduler environment variables:
+# - RANKER_SCHEDULER_INTERVAL: seconds between retrains (0 disables)
+# - RANKER_SCHEDULER_ROI_THRESHOLD: ROI delta triggering immediate retrain
+# - RANKER_SCHEDULER_RISK_THRESHOLD: risk delta triggering immediate retrain
+# - RANKER_SCHEDULER_EVENT_LOG: path to SQLite log for UnifiedEventBus
+# - RANKER_SCHEDULER_RABBITMQ_HOST: RabbitMQ host for event mirroring

@@ -1,0 +1,46 @@
+{
+  "shared": [
+    "bots",
+    "code",
+    "discrepancies",
+    "enhancements",
+    "errors",
+    "information",
+    "overrides",
+    "workflow_summaries",
+    "telemetry"
+  ],
+  "local": [
+    "events",
+    "memory",
+    "menace_config",
+    "metrics",
+    "models",
+    "patch_history",
+    "roi_logs",
+    "sandbox_metrics",
+    "variants",
+    "vector_metrics",
+    "roi_telemetry",
+    "roi_prediction_events",
+    "results",
+    "resolutions",
+    "deployments",
+    "bot_trials",
+    "update_history",
+    "roi_events",
+    "action_roi",
+    "ledger",
+    "stripe_ledger",
+    "profit_history",
+    "capital_summary",
+    "bot_performance",
+    "maintenance",
+    "allocations",
+    "risk_summaries"
+  ],
+  "deny": [
+    "capital_ledger",
+    "finance_logs"
+  ]
+}
